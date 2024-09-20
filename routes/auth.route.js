@@ -1,18 +1,19 @@
-import express from 'express'
-import { login, register } from '../controllers/auth.controller.js';
+import {Router} from 'express'
+import { infoUser, login, logout, refreshToken, register } from '../controllers/auth.controller.js';
 import {body} from 'express-validator'
 import { validationResultsExpress } from '../middlewares/validationResults.js';
+import { requireToken } from '../middlewares/requireToken.js';
 
-const autRouter = express.Router();
+const authRouter = Router();
 
-autRouter.post('/login', [
+authRouter.post('/login', [
     body('email', 'Formato de email incorrecto').trim().isEmail().normalizeEmail(),
     body('password', "Mínimo 6 caracteres").trim().isLength({min: 6}),
     ], 
     validationResultsExpress,
     login)
 
-autRouter.post('/register', [
+authRouter.post('/register', [
     body('email', 'Formato de email incorrecto').trim().isEmail().normalizeEmail(),
     body('password', "Mínimo 6 caracteres").trim().isLength({min: 6}),
     body('password', 'Formato de password incorrecto').custom((value, {req}) => {        
@@ -25,6 +26,8 @@ autRouter.post('/register', [
     validationResultsExpress, 
     register)
 
+authRouter.get('/protected', [requireToken], infoUser)
+authRouter.get('/refresh', refreshToken)
+authRouter.get('/logout', logout)
 
-
-export default autRouter;
+export default authRouter;
