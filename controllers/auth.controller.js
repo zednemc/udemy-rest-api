@@ -1,20 +1,23 @@
-import jwt from "jsonwebtoken"
 import { User } from "../models/user.js"
-import { generateRefreshToken, generateToken } from "../utils/generateTokens.js"
+import { generateRefreshToken, generateToken, TokenVerificationErrors } from "../utils/generateTokens.js"
 
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body
+        console.log('login', email, password)
 
         let user = await User.findOne({email})
         if(!user) {
             return res.status(403).json({error: 'Credenciales incorrectas'}) 
         }
 
+        console.log('user', user)
         const testPassword = await  user.comparePassword(password)
         if(!testPassword) {
             return res.status(403).json({ error: 'Credenciales incorrectas'})
         }
+
+        console.log('testPassword', testPassword)
 
         // Generar JWT
         const {token, expiresIn } = generateToken(user.id);
@@ -46,9 +49,11 @@ export const register = async (req, res) => {
         const user = new User({ email, password })
         await user.save()
 
-        //jwt token
+        // Generar JWT
+        const {token, expiresIn } = generateToken(user.id);
+        generateRefreshToken(user.id, res)
 
-        return res.status(201).json({ok: true})
+        return res.status(201).json({token, expiresIn})
     } catch (error) {
         console.log(error.code)
         // alternativa por defecto mongoose
@@ -75,33 +80,12 @@ export const infoUser = async (req, res) => {
 }
 
 export const refreshToken = (req, res) => {
-    
     try {
-        
-        const refreshTokenCookie = req.cookies.refreshToken
-        console.log(refreshTokenCookie)
-
-        if(!refreshTokenCookie) {
-            throw new Error('invalid token')
-        }    
-
-        const {uid} = jwt.verify(refreshTokenCookie, process.env.JWT_REFRESH)
         // Generar JWT
-        const {token, expiresIn } = generateToken(uid);
-
+        const {token, expiresIn } = generateToken(req.uid);
         res.json({ token, expiresIn })
     } catch (error) {
-        const TokenVerificationErrors = {
-            'jwt expired': 'JWT expirado',
-            'jwt malformed': 'Token no válido',
-            'invalid signature': 'Signatura no válidad',
-            'invalid token': 'Token no válido',
-            'Unexpected token': 'Token no válido',
-            'Not (Bearer) authorized': 'Utiliza formato Bearer'
-        }
-
         const err = error.message.startsWith('Unexpected token')?'Unexpected token':error.message;
-
         return res.status(401).json({error: TokenVerificationErrors[err]})
     }
 }

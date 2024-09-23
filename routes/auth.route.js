@@ -3,18 +3,19 @@ import { infoUser, login, logout, refreshToken, register } from '../controllers/
 import {body} from 'express-validator'
 import { validationResultsExpress } from '../middlewares/validationResults.js';
 import { requireToken } from '../middlewares/requireToken.js';
+import { requireRefreshToken } from '../middlewares/requireRefreshToken.js';
 
 const authRouter = Router();
 
 authRouter.post('/login', [
-    body('email', 'Formato de email incorrecto').trim().isEmail().normalizeEmail(),
+    body('email', 'Formato de email incorrecto').trim().isEmail(),
     body('password', "Mínimo 6 caracteres").trim().isLength({min: 6}),
     ], 
     validationResultsExpress,
     login)
 
 authRouter.post('/register', [
-    body('email', 'Formato de email incorrecto').trim().isEmail().normalizeEmail(),
+    body('email', 'Formato de email incorrecto').trim().isEmail(),
     body('password', "Mínimo 6 caracteres").trim().isLength({min: 6}),
     body('password', 'Formato de password incorrecto').custom((value, {req}) => {        
         if(value !== req.body.repassword) {
@@ -27,7 +28,7 @@ authRouter.post('/register', [
     register)
 
 authRouter.get('/protected', [requireToken], infoUser)
-authRouter.get('/refresh', refreshToken)
+authRouter.get('/refresh', [requireRefreshToken], refreshToken)
 authRouter.get('/logout', logout)
 
 export default authRouter;
