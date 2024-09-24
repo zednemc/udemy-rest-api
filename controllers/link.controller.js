@@ -17,6 +17,29 @@ export const  getLinks = async (req, res) => {
 
 export const getLink = async (req, res) => {
     try {
+        const {nanoLink} = req.params
+        console.log(nanoLink)
+        const link = await Link.findOne({nanoLink})
+        console.log(link)
+
+        if(!link) {
+            return res.status(404).json({error: 'Link not found'})
+        }
+
+        /*if(!link.uid.equals(req.uid)) {
+            return res.status(401).json({error: 'Not authorized'})
+        }*/
+
+        res.json({longLink: link.longLink})
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({error: 'Server error'})
+    }
+}
+
+// CRUD tradicional
+export const getLinkV1 = async (req, res) => {
+    try {
         const {id} = req.params
         console.log(id)
         const link = await Link.findById(id)
@@ -68,6 +91,33 @@ export const deleteLink = async (req, res) => {
         }
 
         await link.deleteOne()
+
+        res.json({link})
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({error: 'Server error'})
+    }
+}
+
+export const updateLink = async (req, res) => {
+    try {
+        const {id} = req.params
+        const { longLink } = req.body
+        
+        
+        
+        const link = await Link.findById(id)
+        
+        if(!link) {
+            return res.status(404).json({error: 'Link not found'})
+        }
+
+        if(!link.uid.equals(req.uid)) {
+            return res.status(401).json({error: 'Not authorized'})
+        }
+
+        link.longLink=longLink
+        await link.save()
 
         res.json({link})
     } catch (error) {

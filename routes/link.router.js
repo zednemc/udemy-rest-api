@@ -1,5 +1,5 @@
 import {Router} from 'express'
-import { createLink, deleteLink, getLink, getLinks } from '../controllers/link.controller.js';
+import { createLink, deleteLink, getLink, getLinks, updateLink } from '../controllers/link.controller.js';
 import { requireToken } from '../middlewares/requireToken.js';
 import { bodyLinkValidator, paramLinkValidator } from '../middlewares/validationResults.js';
 
@@ -12,11 +12,11 @@ const router = Router()
 // DELETE       /api/v1/links/:id   delete link  
 
 router.get('/', requireToken, getLinks)
-router.get('/:id', requireToken, paramLinkValidator, getLink)
+// CRUD tradicional
+//router.get('/:id', requireToken, paramLinkValidator, getLinkV1)
+router.get('/:nanoLink', getLink)
 router.post('/', requireToken, bodyLinkValidator, createLink)
-
+router.patch('/:id', requireToken, paramLinkValidator, bodyLinkValidator, updateLink)
 router.delete('/:id', requireToken, paramLinkValidator, deleteLink)
-
-
 
 export default router;

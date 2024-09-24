@@ -11,13 +11,13 @@ export const login = async (req, res) => {
             return res.status(403).json({error: 'Credenciales incorrectas'}) 
         }
 
-        console.log('user', user)
+        //console.log('user', user)
         const testPassword = await  user.comparePassword(password)
         if(!testPassword) {
             return res.status(403).json({ error: 'Credenciales incorrectas'})
         }
 
-        console.log('testPassword', testPassword)
+        //console.log('testPassword', testPassword)
 
         // Generar JWT
         const {token, expiresIn } = generateToken(user.id);

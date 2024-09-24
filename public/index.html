@@ -8,8 +8,8 @@
 </head>
 <body>
     <form id="form">
-        <input type="email" name="email" id="email" value="a.mendez.externo@gmail.com">
-        <input type="password" name="password" id="password" value="W2jdFEac_CN">
+        <input type="email" name="email" id="email" value="jaio.ripa@gmail.com">
+        <input type="password" name="password" id="password" value="123456">
         <button type="submit">Acceder</button>
     </form>
 
@@ -22,7 +22,7 @@
             e.preventDefault()
 
             try {
-                const res = await fetch('/api/v1/auth/login', {
+                const res = await fetch('http://localhost:5000/api/v1/auth/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
